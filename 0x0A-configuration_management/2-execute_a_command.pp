@@ -1,6 +1,7 @@
-# kill process killmenow
+#Execute a bash command
 
-exec { 'pkill':
-  command  => 'pkill killmenow',
-  provider => 'shell',
+exec {
+  'pkill':
+  command => 'pkill killmenow',
+  path    => ['/bin', '/usr/bin'],
 }
