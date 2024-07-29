@@ -1,39 +1,23 @@
 #!/usr/bin/python3
+"""Exports data in the CSV format"""
 
-"""[task 1, get and save on csv]
-"""
-import csv
-import requests
-from sys import argv
+if __name__ == "__main__":
 
+    import csv
+    import requests
+    import sys
 
-def get_user(id):
-    """get the user
-    Args:
-        id (integer: user id]
-    """
-    url = 'https://jsonplaceholder.typicode.com/'
-    users = requests.get(url + 'users', params={'id': id}).json()
-    todos = requests.get(url + 'todos', params={'userId': id}).json()
-    return([users, todos])
+    userId = sys.argv[1]
+    user = requests.get("https://jsonplaceholder.typicode.com/users/{}"
+                        .format(userId))
+    name = user.json().get('username')
+    todos = requests.get('https://jsonplaceholder.typicode.com/todos')
 
-
-def store_csv(data):
-    """data to csv
-
-    Args:
-        data (list): users and todos
-    """
-    users = data[0]
-    todos = data[1]
-    username = users[0]['username']
-    with open(argv[1] + '.csv', 'w', newline='') as f:
-        towrite = csv.writer(f, quoting=csv.QUOTE_ALL)
-        for task in todos:
-            towrite.writerow([task['userId'], username,
-                             task['completed'], task['title']])
-
-
-if __name__ == '__main__':
-    data = get_user(argv[1])
-    store_csv(data)
+    filename = userId + '.csv'
+    with open(filename, mode='w') as f:
+        writer = csv.writer(f, delimiter=',', quotechar='"',
+                            quoting=csv.QUOTE_ALL, lineterminator='\n')
+        for task in todos.json():
+            if task.get('userId') == int(userId):
+                writer.writerow([userId, name, str(task.get('completed')),
+                                 task.get('title')])

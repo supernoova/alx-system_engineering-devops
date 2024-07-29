@@ -1,45 +1,29 @@
 #!/usr/bin/python3
+"""Exports data in the JSON format"""
 
-"""[task 1, get and save on json]
-"""
-import json
-import requests
-from sys import argv
+if __name__ == "__main__":
 
+    import json
+    import requests
+    import sys
 
-def get_user(id):
-    """get the user
-    Args:
-        id (integer: user id]
-    """
-    url = 'https://jsonplaceholder.typicode.com/'
-    users = requests.get(url + 'users', params={'id': id}).json()
-    todos = requests.get(url + 'todos', params={'userId': id}).json()
-    return([users, todos])
+    userId = sys.argv[1]
+    user = requests.get("https://jsonplaceholder.typicode.com/users/{}"
+                        .format(userId))
+    todos = requests.get('https://jsonplaceholder.typicode.com/todos')
+    todos = todos.json()
 
+    todoUser = {}
+    taskList = []
 
-def store_csv(data):
-    """data to json
-
-    Args:
-        data (list): users and todos
-    """
-
-    users = data[0]
-    todos = data[1]
-    username = users[0]['username']
-    info = {}
-    list_items = []
     for task in todos:
-        list_items.append({
-                                'task': task['title'],
-                                'completed': task['completed'],
-                                'username': username})
-    info[task['userId']] = list_items
-    with open(str(argv[1]) + '.json', 'w') as f:
-        json.dump(info, f)
+        if task.get('userId') == int(userId):
+            taskDict = {"task": task.get('title'),
+                        "completed": task.get('completed'),
+                        "username": user.json().get('username')}
+            taskList.append(taskDict)
+    todoUser[userId] = taskList
 
-
-if __name__ == '__main__':
-    data = get_user(argv[1])
-    store_csv(data)
+    filename = userId + '.json'
+    with open(filename, mode='w') as f:
+        json.dump(todoUser, f)
